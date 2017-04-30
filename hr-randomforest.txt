@@ -1,0 +1,53 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.trees.RandomForest -P 100 -I 1000 -num-slots 4 -K 0 -M 1.0 -V 0.001 -S 16543543
+Relation:     HR_comma_sep-weka.filters.unsupervised.attribute.Reorder-R1,2,4,5,6,7,8,9,10,3-weka.filters.unsupervised.attribute.Reorder-R1,2,3,4,5,6,7,8,10,9-weka.filters.unsupervised.attribute.Reorder-R1,2,3,4,5,6,7,9,10,8-weka.filters.unsupervised.attribute.Reorder-R1,2,3,4,5,7,8,9,10,6-weka.filters.unsupervised.attribute.NumericToNominal-R5,6,10
+Instances:    14999
+Attributes:   10
+              satisfaction_level
+              last_evaluation
+              average_montly_hours
+              time_spend_company
+              Work_accident
+              promotion_last_5years
+              number_project
+              salary
+              sales
+              left
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+RandomForest
+
+Bagging with 1000 iterations and base learner
+
+weka.classifiers.trees.RandomTree -K 0 -M 1.0 -V 0.001 -S 16543543 -do-not-check-capabilities
+
+Time taken to build model: 4.11 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances       14882               99.2199 %
+Incorrectly Classified Instances       117                0.7801 %
+Kappa statistic                          0.9784
+Mean absolute error                      0.0264
+Root mean squared error                  0.0958
+Relative absolute error                  7.2801 %
+Root relative squared error             22.4898 %
+Total Number of Instances            14999     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.998    0.026    0.992      0.998    0.995      0.978    0.994     0.997     0
+                 0.974    0.002    0.993      0.974    0.983      0.978    0.994     0.990     1
+Weighted Avg.    0.992    0.020    0.992      0.992    0.992      0.978    0.994     0.995     
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+ 11403    25 |     a = 0
+    92  3479 |     b = 1
+
