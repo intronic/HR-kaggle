@@ -1,0 +1,140 @@
+---
+title: "HR"
+author: "Mike Pheasant"
+date: "01/05/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("tidyverse")
+# install.packages("plotly")
+# install.packages("corrplot")
+library(plotly)
+library(tidyverse)
+library(corrplot)
+
+```
+
+## Load and Summarize Data
+
+Derive a location (Brisbane, San Francisco or London) from the employee role:
+* 90% of IT staff in Brisbane (5% in each other location)
+* 90% sales in San Francisco (5% in each other location)
+* 90% other categories in London (5% in each other location)
+
+```{r}
+location <- function(role) {
+  prob=switch(as.character(role),
+              IT=c(0.9, 0.05, 0.05),
+              sales=c(0.05, 0.9, 0.05),
+              c(0.05, 0.05, 0.9)
+  )
+  sample(c('Brisbane','San Francisco','London'), 1, rep=TRUE, prob=prob)
+}
+```
+
+Load raw data (from https://www.kaggle.com/ludobenistant/hr-analytics), add factors, save, and summarise.
+
+```{r}
+HR <- read_csv("~/play/HR-kaggle/HR_comma_sep.csv", col_types=cols(
+  satisfaction_level = col_double(),
+  last_evaluation = col_double(),
+  number_project = col_integer(),
+  average_montly_hours = col_integer(),
+  time_spend_company = col_integer(),
+  Work_accident = col_integer(),
+  left = col_integer(),
+  promotion_last_5years = col_integer(),
+  sales = col_character(),
+  salary = col_character()
+))
+
+HR$salary <- factor(HR$salary, levels=c("low", "medium", "high"), ordered=TRUE)
+HR$sales <- factor(HR$sales)
+HR$location <- factor(sapply(HR$sales, location))
+
+HR$Work_accident_ <- factor(HR$Work_accident == 1)
+HR$promotion_last_5years_ <- factor(HR$promotion_last_5years == 1)
+HR$left_ <- factor(HR$left==1)
+
+write_csv(HR, "~/play/HR-kaggle/HR.csv")
+
+summary(HR)
+```
+
+## Exploratory Data Analysis
+
+### Numeric Correlations 
+
+Leaving is negatively correlated with:
+
+* satisfaction level (-0.39) 
+* having a work accident (-0.15) 
+* and less so with a promotion in the last 5 years (-0.06)
+
+Leaving is positively correlated with:
+
+* the time spent with the company (0.14)
+* and less so with average hours worked per month (0.07)
+
+In addition:
+
+* satisfaction level is correlated with last evaluation (0.11), and negatively with number of projects (-0.14) and time spent with company (-0.10)
+* last evaluation is positively correlated with number of projects (0.35), average monthly hours (0.34) and time spent with company (0.13)
+
+```{r}
+M <- cor(HR[1:8])
+corrplot(M, method = 'circle', order ="hclust",
+         tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45)
+```
+
+### Career advancement
+
+Many people leaving have been with the company at least 4 years but have not had a promotion in the last 5 years, despite working long hours.
+
+```{r}
+with(HR, coplot(average_montly_hours ~ jitter(time_spend_company) |
+                promotion_last_5years_ + left_))
+```
+
+These unpromoted, long-term workers who leave are receiving the highest evaluations.
+
+```{r}
+with(HR, coplot(last_evaluation ~ jitter(time_spend_company) |
+                promotion_last_5years_ + left_))
+```
+
+These unpromoted, long-term workers who leave are also reporting high levels of satisfaction with the company.
+
+```{r}
+with(HR, coplot(satisfaction_level ~ jitter(time_spend_company) |
+                promotion_last_5years_ + left_))
+```
+
+Of the unpromoted workers putting in long hours who are leaving, some report the lowest levels of satisfaction, but more report very high levels of satisfaction. 
+
+The ones who are working the fewest hours report fairly low satisfaction. 
+
+```{r}
+with(HR, coplot(average_montly_hours ~ satisfaction_level |
+                promotion_last_5years_ + left_))
+```
+
+Workers who put in many hours on many projects tend to leave if they havent had a promotion in the last 5 years.
+
+```{r}
+with(HR, coplot(average_montly_hours ~ jitter(number_project) |
+                promotion_last_5years_ + left_))
+```
+
+Of the unpromoted workers who left, many had both high evaluations and high levels of satisfaction.
+
+```{r}
+with(HR, coplot(last_evaluation ~ satisfaction_level |
+                promotion_last_5years_ + left_))
+```
+
+
+
+
