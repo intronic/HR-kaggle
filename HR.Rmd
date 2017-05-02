@@ -3,8 +3,8 @@ title: "HR"
 author: "Mike Pheasant"
 date: "01/05/2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -18,8 +18,9 @@ library(tidyverse)
 library(corrplot)
 library(car)
 library(RColorBrewer)
-library(plyr)
 library(plotly)
+library(plyr)
+library(dplyr)
 
 ```
 
@@ -28,7 +29,7 @@ library(plotly)
 ```{r, include=FALSE}
 # Derive a location (Brisbane, San Francisco or London) from the employee role:
 # * 90% of IT staff in Brisbane (5% in each other location)
-# * 90% sales in San Francisco (5% in each other location)
+# * 90% Dept in San Francisco (5% in each other location)
 # * 90% other categories in London (5% in each other location)
 
 location <- function(role) {
@@ -56,14 +57,19 @@ HR <- read_csv("HR_comma_sep.csv", col_types=cols(
   sales = col_character(),
   salary = col_character()
 ))
+HR <- plyr::rename(HR, replace=c("satisfaction_level"="Satis", "last_evaluation"="Eval",
+            "number_project"="NumProj", "average_montly_hours"="MonHrs",
+            "time_spend_company"="Tenure", "Work_accident"="Accdt01", 
+            "left"="Left01", "promotion_last_5years"="Promo5yr01",
+            "sales"="Dept", "salary"="Salary"))
 
-HR$salary <- factor(HR$salary, levels=c("low", "medium", "high"), ordered=TRUE)
-HR$sales <- factor(HR$sales)
-# HR$location <- factor(sapply(HR$sales, location))
+HR$Salary <- factor(HR$Salary, levels=c("low", "medium", "high"), ordered=TRUE)
+HR$Dept <- factor(HR$Dept)
+# HR$location <- factor(sapply(HR$Dept, location))
 
-HR$Work_accident_ <- factor(HR$Work_accident == 1)
-HR$promotion_last_5years_ <- factor(HR$promotion_last_5years == 1)
-HR$left_ <- factor(HR$left==1)
+HR$Accdt <- factor(HR$Accdt01 == 1)
+HR$Promo5yr <- factor(HR$Promo5yr01 == 1)
+HR$Left <- factor(HR$Left01==1)
 
 # write_csv(HR, "HR.csv")
 ```
@@ -85,7 +91,7 @@ my_colors <- brewer.pal(3, "Set2")
 samp.sz <- 3000
 pct <- round(100*samp.sz/nrow(HR))
 data <- HR[sample(nrow(HR), samp.sz),]
-scatterplotMatrix(~satisfaction_level+last_evaluation+number_project+average_montly_hours+time_spend_company+Work_accident+promotion_last_5years+sales+salary|left, data=data, reg.line="", smoother="", col=my_colors , smoother.args=list(col="grey") , pch=c(3,4), legend.plot=FALSE, main=paste("Scatter Plot Pairs for HR Turnover (",pct,"% of data)", sep=""))
+scatterplotMatrix(~Satis+Eval+NumProj+MonHrs+Tenure+Accdt01+Promo5yr01+Dept+Salary|Left01, data=data, reg.line="", smoother="", col=my_colors , smoother.args=list(col="grey") , pch=c(3,4), legend.plot=FALSE, main=paste("Scatter Plot Pairs for HR Turnover (",pct,"% of data)", sep=""))
 par(xpd=TRUE, cex=0.7)
 legend(x=0.92, y=1.16, c("Stay", "Leave"), col=my_colors, pch=c(3,4), horiz=TRUE)
 dev.off()
@@ -103,13 +109,13 @@ Leaving is negatively correlated with:
 
 Leaving is positively correlated with:
 
-* the time spent with the company (0.14)
+* tenure (0.14)
 * and less so with average hours worked per month (0.07)
 
 In addition:
 
-* satisfaction level is correlated with last evaluation (0.11), and negatively with number of projects (-0.14) and time spent with company (-0.10)
-* last evaluation is positively correlated with number of projects (0.35), average monthly hours (0.34) and time spent with company (0.13)
+* satisfaction level is correlated with last evaluation (0.11), and negatively with number of projects (-0.14) and tenure (-0.10)
+* last evaluation is positively correlated with number of projects (0.35), average monthly hours (0.34) and tenure (0.13)
 
 ```{r}
 M <- cor(HR[1:8])
@@ -120,7 +126,7 @@ corrplot(M, method = 'pie', order ="hclust",
 ### Pairwise Numeric Correlations for Leaving Employees
 
 ```{r}
-M <- cor(HR[HR$left_==TRUE,c(1:6,8)])
+M <- cor(HR[HR$Left==TRUE,c(1:6,8)])
 corrplot(M, method = 'pie', order ="hclust",
          tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45, addrect=2)
 ```
@@ -129,7 +135,7 @@ corrplot(M, method = 'pie', order ="hclust",
 ### Pairwise Numeric Correlations for Staying Employees
 
 ```{r}
-M <- cor(HR[HR$left_==FALSE,c(1:6,8)])
+M <- cor(HR[HR$Left==FALSE,c(1:6,8)])
 corrplot(M, method = 'pie', order ="hclust",
          tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45, addrect=2)
 ```
@@ -143,22 +149,22 @@ corrplot(M, method = 'pie', order ="hclust",
 Many people leaving have been with the company at least 4 years but have not had a promotion in the last 5 years, despite working long hours.
 
 ```{r}
-with(HR, coplot(average_montly_hours ~ jitter(time_spend_company) |
-                promotion_last_5years_ + left_))
+with(HR, coplot(MonHrs ~ jitter(Tenure) |
+                Promo5yr + Left))
 ```
 
 These unpromoted, long-term workers who leave are receiving the highest evaluations.
 
 ```{r}
-with(HR, coplot(last_evaluation ~ jitter(time_spend_company) |
-                promotion_last_5years_ + left_))
+with(HR, coplot(Eval ~ jitter(Tenure) |
+                Promo5yr + Left))
 ```
 
 These unpromoted, long-term workers who leave are also reporting high levels of satisfaction with the company.
 
 ```{r}
-with(HR, coplot(satisfaction_level ~ jitter(time_spend_company) |
-                promotion_last_5years_ + left_))
+with(HR, coplot(Satis ~ jitter(Tenure) |
+                Promo5yr + Left))
 ```
 
 Of the unpromoted workers putting in long hours who are leaving, some report the lowest levels of satisfaction, but more report very high levels of satisfaction. 
@@ -166,27 +172,27 @@ Of the unpromoted workers putting in long hours who are leaving, some report the
 The ones who are working the fewest hours report fairly low satisfaction. 
 
 ```{r}
-with(HR, coplot(average_montly_hours ~ satisfaction_level |
-                promotion_last_5years_ + left_))
+with(HR, coplot(MonHrs ~ Satis |
+                Promo5yr + Left))
 ```
 
 The staff on the largest number of projects and who put in the longest hours, with no promotion in 5 years, tend to leave.
 
 ```{r}
-with(HR, coplot(average_montly_hours ~ jitter(number_project) |
-                promotion_last_5years_ + left_))
+with(HR, coplot(MonHrs ~ jitter(NumProj) |
+                Promo5yr + Left))
 ```
 
 Of the unpromoted workers who left, many had both high evaluations and high levels of satisfaction.
 
 ```{r}
-with(HR, coplot(last_evaluation ~ satisfaction_level |
-                promotion_last_5years_ + left_))
+with(HR, coplot(Eval ~ Satis |
+                Promo5yr + Left))
 ```
 
 ## 
 
 Plot:
-evaluation, satisfaction | hours + left_
-evaluation, satisfaction | time with co + left_
-evaluation, satisfaction | number_project + left_
+evaluation, satisfaction | hours + Left
+evaluation, satisfaction | time with co + Left
+evaluation, satisfaction | NumProj + Left
