@@ -65,13 +65,14 @@ HR <- plyr::rename(HR, replace=c("satisfaction_level"="Satis", "last_evaluation"
 
 HR$Salary <- factor(HR$Salary, levels=c("low", "medium", "high"), ordered=TRUE)
 HR$Dept <- factor(HR$Dept)
-# HR$location <- factor(sapply(HR$Dept, location))
 
 HR$Accdt <- factor(HR$Accdt01 == 1)
 HR$Promo5yr <- factor(HR$Promo5yr01 == 1)
 HR$Left <- factor(HR$Left01==1)
 
-# write_csv(HR, "HR.csv")
+set.seed(42)
+HR$location <- factor(sapply(HR$Dept, location))
+write_csv(HR, "HR.csv")
 ```
 
 ## Data Summary
