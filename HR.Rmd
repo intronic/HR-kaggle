@@ -9,17 +9,17 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-#install.packages("tidyverse")
-# install.packages("plotly")
+# install.packages("tidyverse")
 # install.packages("corrplot")
 # install.packages('plyr')
+# install.packages("plotly")
 
-library(plotly)
 library(tidyverse)
 library(corrplot)
 library(car)
 library(RColorBrewer)
 library(plyr)
+library(plotly)
 
 ```
 
@@ -44,7 +44,7 @@ location <- function(role) {
 Load raw data (from https://www.kaggle.com/ludobenistant/hr-analytics), add factors, save, and summarise.
 
 ```{r}
-HR <- read_csv("~/play/HR-kaggle/HR_comma_sep.csv", col_types=cols(
+HR <- read_csv("HR_comma_sep.csv", col_types=cols(
   satisfaction_level = col_double(),
   last_evaluation = col_double(),
   number_project = col_integer(),
@@ -67,7 +67,7 @@ HR$Work_accident_ <- factor(HR$Work_accident == 1)
 HR$promotion_last_5years_ <- factor(HR$promotion_last_5years == 1)
 HR$left_ <- factor(HR$left==1)
 
-write_csv(HR, "~/play/HR-kaggle/HR.csv")
+write_csv(HR, "HR.csv")
 
 summary(HR)
 ```
@@ -150,12 +150,12 @@ with(HR, coplot(last_evaluation ~ satisfaction_level |
 # plot.new()
 # png(filename="/Users/mike/play/HR-kaggle/hr-scatter.png", res=300, width = 3000, height = 3000)
 my_colors <- brewer.pal(3, "Set2")
-samp.sz <- 3000
+samp.sz <- 300
 pct <- round(100*samp.sz/nrow(HR))
 data <- HR[sample(nrow(HR), samp.sz),]
 scatterplotMatrix(~satisfaction_level+last_evaluation+number_project+average_montly_hours+time_spend_company+Work_accident+promotion_last_5years+sales+salary|left, data=data, reg.line="", smoother="", col=my_colors , smoother.args=list(col="grey") , pch=c(3,4), legend.plot=FALSE, main=paste("Scatter Plot Pairs for HR Turnover (",pct,"% of data)", sep=""))
 par(xpd=TRUE, cex=0.7)
-legend(0.89, 1.05, c("Stay", "Leave"), col=my_colors, pch=c(3,4), horiz=TRUE)
+legend(x=0.93, y=1.16, c("Stay", "Leave"), col=my_colors, pch=c(3,4), horiz=TRUE)
 #dev.off()
 ```
 
