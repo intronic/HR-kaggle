@@ -1,7 +1,3 @@
 # HR-kaggle
 
-
-
-## Data file
-
-Original data from: https://www.kaggle.com/ludobenistant/hr-analytics
+An [HR.html](analysis of HR data) from kaggle using R (and RMarkdown).
