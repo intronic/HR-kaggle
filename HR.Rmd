@@ -232,7 +232,7 @@ corrplot(M, p.mat = pval99[[1]], sig.level=0.01, method = 'pie', order ="hclust"
 
 #### Discussion
 
-Surprisingly, the strongest correlation in the data of staff who stay is decreasing job satisfaction levels with increasing tenure with the company. Unsurprisingly, promotions are correlated with increasing tenure and satisfaction levels are correlated with evaluations.
+There are fewer correlations in the subset of data for staff who stay than the overall dataset. Surprisingly, the strongest correlation is decreasing job satisfaction levels with increasing tenure with the company. Unsurprisingly, promotions are correlated with increasing tenure and satisfaction levels are correlated with evaluations.
 
 These staff seem to be staying if they are promoted, happier if they receive good evaluations, but unhappier the longer they stay.
 
