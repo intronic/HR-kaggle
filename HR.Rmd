@@ -82,7 +82,7 @@ write_csv(HR, "HR.csv")
 
 ### Dimensional Summary
 
-Basic summary of numeric and categorical dimensions of the data showing range and factor counts, respectively.
+Basic summary of numeric and categorical dimensions of the data showing 6-number summaries and factor counts, respectively.
 
 * Satis: satisfaction level
 
@@ -307,22 +307,19 @@ These staff seem to be hard-working, happier the longer they stay and if they ar
 Many people leaving have been with the company at least 4 years but have not had a promotion in the last 5 years, despite working long hours.
 
 ```{r}
-with(HR, coplot(MonHrs ~ jitter(Tenure) |
-                Promo5yr + Left))
+with(HR, coplot(MonHrs ~ jitter(Tenure) | Promo5yr + Left))
 ```
 
 These unpromoted, long-term workers who leave are receiving the highest evaluations.
 
 ```{r}
-with(HR, coplot(Eval ~ jitter(Tenure) |
-                Promo5yr + Left))
+with(HR, coplot(Eval ~ jitter(Tenure) | Promo5yr + Left))
 ```
 
 These unpromoted, long-term workers who leave are also reporting high levels of satisfaction with the company.
 
 ```{r}
-with(HR, coplot(Satis ~ jitter(Tenure) |
-                Promo5yr + Left))
+with(HR, coplot(Satis ~ jitter(Tenure) | Promo5yr + Left))
 ```
 
 Of the unpromoted workers putting in long hours who are leaving, some report the lowest levels of satisfaction, but more report very high levels of satisfaction. 
@@ -330,28 +327,18 @@ Of the unpromoted workers putting in long hours who are leaving, some report the
 The ones who are working the fewest hours report fairly low satisfaction. 
 
 ```{r}
-with(HR, coplot(MonHrs ~ Satis |
-                Promo5yr + Left))
+with(HR, coplot(MonHrs ~ Satis | Promo5yr + Left))
 ```
 
 The staff on the largest number of projects and who put in the longest hours, with no promotion in 5 years, tend to leave.
 
 ```{r}
-with(HR, coplot(MonHrs ~ jitter(NumProj) |
-                Promo5yr + Left))
+with(HR, coplot(MonHrs ~ jitter(NumProj) | Promo5yr + Left))
 ```
 
 Of the unpromoted workers who left, many had both high evaluations and high levels of satisfaction.
 
 ```{r}
-with(HR, coplot(Eval ~ Satis |
-                Promo5yr + Left))
+with(HR, coplot(Eval ~ Satis | Promo5yr + Left))
 ```
 
-
-## 
-
-Plot:
-evaluation, satisfaction | hours + Left
-evaluation, satisfaction | time with co + Left
-evaluation, satisfaction | NumProj + Left
