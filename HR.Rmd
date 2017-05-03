@@ -111,12 +111,30 @@ dev.off()
 
 ![](hr-scatter.png)
 
+#### Discussion
+
+Pairwise scatterplots and distributions suggest multi-modal distributions and significant clustering between dimensions for the subset of staff that leave. Add features to classify dimensions for:
+
+* evaluation
+* satisfaction
+* tenure
+* number of projects
+* monthly hours worked
+ 
 
 ### Pairwise Numeric Correlations
 
 Correlations between all pairs of numeric dimensions are investigated over the full dataset, and within the Leaving and Staying subsets.
 
-P-values (and optionally confidence intervals) for all pairs are calculated with the following formula. Correlations not passing the significance test (_p_<0.01) will be marked with an 'X' in the matrix.
+Note that three dimensions are binary 0/1 values and need careful interpretation for correlations:
+
+* *Left01* has the value 1 for leave and 0 for stay
+
+* *Promo5yr01* has the value 1 for a promotion within the last 5 years and 0 for none
+
+* *Accdt01* has the value 1 for accident and 0 for none
+
+P-values (and optionally confidence intervals) for all pairs are calculated with the following formula. Correlations not passing the significance test (*p* < 0.01) will be marked with an `✕` in the matrix.
 
 ```{r}
 cor.mtest <- function(mat, conf.level = 0.95){
@@ -137,24 +155,30 @@ cor.mtest <- function(mat, conf.level = 0.95){
 }
 ```
 
-#### Overall (Within the Full Dataset)
+### Overall Correlations (Within the Full Dataset)
 
-Leaving (`Left01`) is negatively correlated with:
+Leaving (where 0=*stay* and 1=*leave*) is correlated with:
 
-* satisfaction level (-0.39) 
-* having a work accident (-0.15) 
-* and less so with a promotion in the last 5 years (-0.06)
+* decreasing satisfaction level (-0.39) (negative correlates with decreasing satisfaction)
+
+* no work accidents (-0.15) (leaving correlates with fewer work accidents)
+
+* no promotion (-0.06) (leaving correlates with no promotion in the last 5 years)
 
 Leaving is positively correlated with:
 
-* tenure (0.14)
-* and less so with average hours worked per month (0.07) and number of projects worked (0.02)
+* tenure (0.14) (longer tenure corelates with leaving)
+
+* average hours worked per month (0.07) and number of projects worked (0.02)
 
 Other significant correlations include:
 
 * satisfaction level is most correlated with last evaluation (0.11), and most negatively with number of projects (-0.14) and tenure (-0.10)
-* last evaluation is positively correlated with number of projects (0.35), average monthly hours (0.34) and tenure (0.13)
-* tenure correlates with the number of projects (0.20), monthly hours worked (0.13), and promotion (0.07)
+
+* last evaluation is positively correlated with number of projects (0.35), average monthly hours (0.34) and longer tenure (0.13)
+
+* tenure correlates with the number of projects (0.20), monthly hours worked (0.13), and receeving a promotion (0.07)
+
 * number of projects correlates with monthly hours worked (0.42)
 
 ```{r}
@@ -166,13 +190,35 @@ corrplot(M, p.mat = pval99[[1]], sig.level=0.01, method = 'pie', order ="hclust"
          tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45)
 ```
 
+#### Discussion
 
-#### Staying Employees
+The correlations between leaving and decreasing levels of satisfaction, longer tenure, longer hours of work per month, and low levels of promotion are perhaps not surprising but are important and should be investigated further to try and determine any causes. 
+
+The relationship between accidents at work, increasing job satisfaction and lower rates of leaving could also be investigated further as it seems counter-intuitive.
+
+Gather additional data on:
+
+* The reasons for leaving 
+
+* The basis of job satisfaction and tenure
+
+* The effectiveness of evaluation procedures
+
+* The reasons for (and impact of) persistent over-work or overloading of projects
+
+This data could be gathered through methods including surveys, interviews, exit interviews and project post-mortems.
+
+
+### Correlations for Staying Employees
 
 * For staff who stay, the strongest correlation is a negative one between job satisfaction and tenure (-0.17)
+
 * Job satisfaction is also negatively correlated with the number of projects worked (-0.09)
+
 * Job satisfaction is positively correlated with evaluation (0.09) and monthly hours worked (0.06)
+
 * Evaluations are positively correlated with monthly hours worked (0.09), job satisfaction (0.09) and the number of projects worked (0.04)
+
 * Tenure is positively correlated with promotion (0.09) and projects worked (0.08)
 
 
@@ -184,13 +230,25 @@ corrplot(M, p.mat = pval99[[1]], sig.level=0.01, method = 'pie', order ="hclust"
          tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45)
 ```
 
+#### Discussion
 
-#### Leaving Employees
+Surprisingly, the strongest correlation in the data of staff who stay is decreasing job satisfaction levels with increasing tenure with the company. Unsurprisingly, promotions are correlated with increasing tenure and satisfaction levels are correlated with evaluations.
+
+These staff seem to be staying if they are promoted, happier if they receive good evaluations, but unhappier the longer they stay.
+
+* More information should be gathered about tenure and job satisfaction levels
+
+
+### Correlations for Leaving Employees
 
 For staff who leave:
+
 * Satisfaction is negatively correlated with the number of projects (-0.23) and the monthly hours worked (-0.08)
+
 * Satisfaction is positively correlated with tenure (0.44) and evaluation (0.18)
-* Evaluations are positively correlated  with monthly hours worked (0.83), the number of projects worked (0.80), tenure (0.78) and job satisfaction (0.18)
+
+* Evaluations are positively correlated with monthly hours worked (0.83), the number of projects worked (0.80), tenure (0.78) and job satisfaction (0.18)
+
 * Tenure is positively correlated with evaluation (0.78), monthly hours worked (0.66), number of projects worked (0.60) and job satisfaction (0.44)
 
 ```{r}
@@ -200,6 +258,17 @@ pval99 <- cor.mtest(DF,0.99)
 corrplot(M, p.mat = pval99[[1]], sig.level=0.01, method = 'pie', order ="hclust", addrect=2,
          tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45)
 ```
+
+#### Discussion
+
+For the staff who leave, there are some similarities with those who stay: tenure is also positively correlated with the monthly hours worked and with evaluations.
+
+However, there are some significant differences. Tenure is positively correlated with job satisfaction and is negatively correlated with promotion --- the opposite holds for those who stay. 
+
+These staff seem to be hard-working, happier the longer they stay and if they are recieving good evaluations, but leaving after not receiving promotions.
+
+* More information should be gathered about tenure and the opportunity for advancement
+
 
 ***
 ## Exploratory Data Analysis
