@@ -24,6 +24,7 @@ library(dplyr)
 
 ```
 
+
 ## Data Import
 
 ```{r, include=FALSE}
@@ -75,7 +76,9 @@ HR$location <- factor(sapply(HR$Dept, location))
 write_csv(HR, "HR.csv")
 ```
 
+***
 ## Data Summary
+
 
 ### Dimensional Summary
 
@@ -83,26 +86,60 @@ write_csv(HR, "HR.csv")
 summary(HR)
 ```
 
+
 ### Pairwise Scatter Plots and Distributions for Staying vs Leaving Staff 
+
+* Most dimensions show significantly different distributions for Staying vs Leaving staff
+* Bimodal distributions for Leaving staff are evident for evaluation, number of projects and monthly hours worked
+* Clustering for Leaving staff is evident comparing: satisfaction, evaluation and monthly hours worked; tenure across many dimensions; and between some departments
+
 
 ```{r eval=FALSE}
 plot.new()
 png(filename="hr-scatter.png", res=300, width = 3000, height = 3000)
 my_colors <- brewer.pal(3, "Set2")
-samp.sz <- 3000
+samp.sz <- 3750
 pct <- round(100*samp.sz/nrow(HR))
 data <- HR[sample(nrow(HR), samp.sz),]
-scatterplotMatrix(~Satis+Eval+NumProj+MonHrs+Tenure+Accdt01+Promo5yr01+Dept+Salary|Left01, data=data, reg.line="", smoother="", col=my_colors , smoother.args=list(col="grey") , pch=c(3,4), legend.plot=FALSE, main=paste("Scatter Plot Pairs for HR Turnover (",pct,"% of data)", sep=""))
+scatterplotMatrix(~Satis+Eval+NumProj+MonHrs+Tenure+Accdt01+Promo5yr01+Dept+Salary|Left01, data=data, reg.line="", smoother="", col=my_colors , smoother.args=list(col="grey") , pch=c(3,4), legend.plot=FALSE, main=paste("Scatter Plot Pairs for HR Turnover (sampling ",pct,"% of data)", sep=""))
 par(xpd=TRUE, cex=0.7)
-legend(x=0.92, y=1.16, c("Stay", "Leave"), col=my_colors, pch=c(3,4), horiz=TRUE)
+Ly <- 1.16 # for inline HTML
+Ly <- 1.05 # for PNG
+legend(x=0.91, y=Ly, c("Stay", "Leave"), col=my_colors, pch=c(3,4), horiz=TRUE)
 dev.off()
 ```
 
 ![](hr-scatter.png)
 
-### Pairwise Numeric Correlations within Full Dataset
 
-Leaving is negatively correlated with:
+### Pairwise Numeric Correlations
+
+Correlations between all pairs of numeric dimensions are investigated over the full dataset, and within the Leaving and Staying subsets.
+
+P-values (and optionally confidence intervals) for all pairs are calculated with the following formula. Correlations not passing the significance test (_p_<0.01) will be marked with an 'X' in the matrix.
+
+```{r}
+cor.mtest <- function(mat, conf.level = 0.95){
+  mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat <- lowCI.mat <- uppCI.mat <- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    diag(lowCI.mat) <- diag(uppCI.mat) <- 1
+    for(i in 1:(n-1)){
+        for(j in (i+1):n){
+            tmp <- cor.test(mat[,i], mat[,j], conf.level = conf.level)
+            p.mat[i,j] <- p.mat[j,i] <- tmp$p.value
+            lowCI.mat[i,j] <- lowCI.mat[j,i] <- tmp$conf.int[1]
+            uppCI.mat[i,j] <- uppCI.mat[j,i] <- tmp$conf.int[2]
+        }
+    }
+    return(list(p.mat, lowCI.mat, uppCI.mat))
+}
+```
+
+#### Overall (Within the Full Dataset)
+
+Leaving (`Left01`) is negatively correlated with:
 
 * satisfaction level (-0.39) 
 * having a work accident (-0.15) 
@@ -111,39 +148,62 @@ Leaving is negatively correlated with:
 Leaving is positively correlated with:
 
 * tenure (0.14)
-* and less so with average hours worked per month (0.07)
+* and less so with average hours worked per month (0.07) and number of projects worked (0.02)
 
-In addition:
+Other significant correlations include:
 
-* satisfaction level is correlated with last evaluation (0.11), and negatively with number of projects (-0.14) and tenure (-0.10)
+* satisfaction level is most correlated with last evaluation (0.11), and most negatively with number of projects (-0.14) and tenure (-0.10)
 * last evaluation is positively correlated with number of projects (0.35), average monthly hours (0.34) and tenure (0.13)
+* tenure correlates with the number of projects (0.20), monthly hours worked (0.13), and promotion (0.07)
+* number of projects correlates with monthly hours worked (0.42)
 
 ```{r}
-M <- cor(HR[1:8])
-corrplot(M, method = 'pie', order ="hclust",
-         tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45, addrect=2)
-```
+DF <- HR[1:8]
+M <- cor(DF)
+pval99 <- cor.mtest(DF,0.99)
 
-### Pairwise Numeric Correlations for Leaving Employees
-
-```{r}
-M <- cor(HR[HR$Left==TRUE,c(1:6,8)])
-corrplot(M, method = 'pie', order ="hclust",
-         tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45, addrect=2)
+corrplot(M, p.mat = pval99[[1]], sig.level=0.01, method = 'pie', order ="hclust", addrect=2,
+         tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45)
 ```
 
 
-### Pairwise Numeric Correlations for Staying Employees
+#### Staying Employees
+
+* For staff who stay, the strongest correlation is a negative one between job satisfaction and tenure (-0.17)
+* Job satisfaction is also negatively correlated with the number of projects worked (-0.09)
+* Job satisfaction is positively correlated with evaluation (0.09) and monthly hours worked (0.06)
+* Evaluations are positively correlated with monthly hours worked (0.09), job satisfaction (0.09) and the number of projects worked (0.04)
+* Tenure is positively correlated with promotion (0.09) and projects worked (0.08)
+
 
 ```{r}
-M <- cor(HR[HR$Left==FALSE,c(1:6,8)])
-corrplot(M, method = 'pie', order ="hclust",
-         tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45, addrect=2)
+DF <- HR[HR$Left==FALSE,c(1:6,8)]
+M <- cor(DF)
+pval99 <- cor.mtest(DF,0.99)
+corrplot(M, p.mat = pval99[[1]], sig.level=0.01, method = 'pie', order ="hclust", addrect=2,
+         tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45)
 ```
 
 
+#### Leaving Employees
 
+For staff who leave:
+* Satisfaction is negatively correlated with the number of projects (-0.23) and the monthly hours worked (-0.08)
+* Satisfaction is positively correlated with tenure (0.44) and evaluation (0.18)
+* Evaluations are positively correlated  with monthly hours worked (0.83), the number of projects worked (0.80), tenure (0.78) and job satisfaction (0.18)
+* Tenure is positively correlated with evaluation (0.78), monthly hours worked (0.66), number of projects worked (0.60) and job satisfaction (0.44)
+
+```{r}
+DF <- HR[HR$Left==TRUE,c(1:6,8)]
+M <- cor(DF)
+pval99 <- cor.mtest(DF,0.99)
+corrplot(M, p.mat = pval99[[1]], sig.level=0.01, method = 'pie', order ="hclust", addrect=2,
+         tl.col="black", tl.cex = 1, tl.offset = 0.1, tl.srt = 45)
+```
+
+***
 ## Exploratory Data Analysis
+
 
 ### Career advancement
 
@@ -190,6 +250,7 @@ Of the unpromoted workers who left, many had both high evaluations and high leve
 with(HR, coplot(Eval ~ Satis |
                 Promo5yr + Left))
 ```
+
 
 ## 
 
