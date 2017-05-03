@@ -82,6 +82,34 @@ write_csv(HR, "HR.csv")
 
 ### Dimensional Summary
 
+Basic summary of numeric and categorical dimensions of the data showing range and factor counts, respectively.
+
+* Satis: satisfaction level
+
+* Eval: last evaluation
+
+* NumProj: number of projects worked on
+
+* MonHrs: average montly hours worked
+
+* Tenure: years spent with the company
+
+* Accdt01: 1 = accident at work, 0 = none
+
+* Accdt: boolean factor - accident at work true / false
+
+* Left01: 1 = left (terminated), 0 = still employed
+
+* Left: boolean factor - terminated true / false
+
+* Promo5yr01: 1 = received a promotion within the last 5 years, 0 = none 
+
+* Promo5yr: boolean factor - promotion within the last 5 years true / false
+
+* Dept: department where employed / role
+
+* Salary: salary level (high/medium/low)
+
 ```{r}
 summary(HR)
 ```
