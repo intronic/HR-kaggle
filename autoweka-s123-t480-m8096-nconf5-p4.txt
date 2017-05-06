@@ -1,0 +1,72 @@
+Auto-WEKA result:
+best classifier: weka.classifiers.trees.RandomForest
+arguments: [-I, 239, -K, 0, -depth, 13]
+attribute search: weka.attributeSelection.GreedyStepwise
+attribute search arguments: [-C, -R]
+attribute evaluation: weka.attributeSelection.CfsSubsetEval
+attribute evaluation arguments: [-L]
+metric: errorRate
+estimated errorRate: 0.0015334355623708247
+training time on evaluation dataset: 3.868 seconds
+
+You can use the chosen classifier in your own code as follows:
+
+AttributeSelection as = new AttributeSelection();
+ASSearch asSearch = ASSearch.forName("weka.attributeSelection.GreedyStepwise", new String[]{"-C", "-R"});
+as.setSearch(asSearch);
+ASEvaluation asEval = ASEvaluation.forName("weka.attributeSelection.CfsSubsetEval", new String[]{"-L"});
+as.setEvaluator(asEval);
+as.SelectAttributes(instances);
+instances = as.reduceDimensionality(instances);
+Classifier classifier = AbstractClassifier.forName("weka.classifiers.trees.RandomForest", new String[]{"-I", "239", "-K", "0", "-depth", "13"});
+classifier.buildClassifier(instances);
+
+
+Correctly Classified Instances       14976               99.8467 %
+Incorrectly Classified Instances        23                0.1533 %
+Kappa statistic                          0.9958
+Mean absolute error                      0.0124
+Root mean squared error                  0.0468
+Relative absolute error                  3.4151 %
+Root relative squared error             10.9972 %
+Total Number of Instances            14999     
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+ 11416    12 |     a = 0
+    11  3560 |     b = 1
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.999    0.003    0.999      0.999    0.999      0.996    1.000     1.000     0
+                 0.997    0.001    0.997      0.997    0.997      0.996    1.000     1.000     1
+Weighted Avg.    0.998    0.003    0.998      0.998    0.998      0.996    1.000     1.000     
+
+
+------- 2 BEST CONFIGURATIONS -------
+
+These are the 2 best configurations, as ranked by SMAC
+Please note that this list only contains configurations evaluated on every fold.
+If you need more configurations, consider running Auto-WEKA for a longer time.
+
+Configuration #1:
+SMAC Score: 0.00906706693351123
+Argument String:
+-_0__wekaclassifierstreesrandomforest_00_INT_I 239 -_0__wekaclassifierstreesrandomforest_01_features_HIDDEN 0 -_0__wekaclassifierstreesrandomforest_02_1_INT_K 0 -_0__wekaclassifierstreesrandomforest_04_depth_HIDDEN 1 -_0__wekaclassifierstreesrandomforest_06_2_INT_depth 13 -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVED -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVED -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVED -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 480.0 -targetclass weka.classifiers.trees.RandomForest 
+
+Configuration #2:
+SMAC Score: 0.009800489215032245
+Argument String:
+-_0__wekaclassifierstreesrandomforest_00_INT_I 10 -_0__wekaclassifierstreesrandomforest_01_features_HIDDEN 0 -_0__wekaclassifierstreesrandomforest_02_1_INT_K 0 -_0__wekaclassifierstreesrandomforest_04_depth_HIDDEN 0 -_0__wekaclassifierstreesrandomforest_05_1_INT_depth 0 -attributesearch NONE -attributetime 480.0 -targetclass weka.classifiers.trees.RandomForest 
+
+----END OF CONFIGURATION RANKING----Temporary run directories:
+C:\Users\mike\AppData\Local\Temp\autoweka1417670857558057957\
+C:\Users\mike\AppData\Local\Temp\autoweka559808475448787497\
+C:\Users\mike\AppData\Local\Temp\autoweka6289380235173429302\
+C:\Users\mike\AppData\Local\Temp\autoweka4428243008923495344\
+
+
+For better performance, try giving Auto-WEKA more time.
+Tried 628 configurations; to get good results reliably you may need to allow for trying thousands of configurations.
